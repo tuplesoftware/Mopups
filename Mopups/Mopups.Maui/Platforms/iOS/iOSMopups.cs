@@ -97,7 +97,7 @@ internal class iOSMopups : IPopupPlatform
 
             if (_windows.Count > 0)
                 _windows.Last().WindowLevel = UIWindowLevel.Normal;
-            {
+            else {
                 var keyWindow = GetKeyWindow();
                 if (keyWindow?.WindowLevel == -1)
                     keyWindow.WindowLevel = UIWindowLevel.Normal;
