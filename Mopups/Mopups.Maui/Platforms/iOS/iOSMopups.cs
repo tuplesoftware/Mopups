@@ -19,7 +19,7 @@ internal class iOSMopups : IPopupPlatform
         var mainPage = Application.Current.MainPage;
         mainPage.AddLogicalChild(page);
 
-        var keyWindow = GetKeyWindow(UIApplication.SharedApplication);
+        var keyWindow = GetKeyWindow();
         if (keyWindow?.WindowLevel == UIWindowLevel.Normal)
             keyWindow.WindowLevel = -1;
 
@@ -57,22 +57,6 @@ internal class iOSMopups : IPopupPlatform
 
 
         return window.RootViewController.PresentViewControllerAsync(handler.ViewController, false);
-
-        UIWindow GetKeyWindow(UIApplication application)
-        {
-            if (!IsiOS13OrNewer)
-                return UIApplication.SharedApplication.KeyWindow;
-
-            var window = application
-                .ConnectedScenes
-                .ToArray()
-                .OfType<UIWindowScene>()
-                .Where(scene => scene.Session.Role == UIWindowSceneSessionRole.Application)
-                .SelectMany(scene => scene.Windows)
-                .FirstOrDefault(window => window.IsKeyWindow);
-
-            return window;
-        }
     }
 
     public async Task RemoveAsync(PopupPage page)
@@ -113,9 +97,27 @@ internal class iOSMopups : IPopupPlatform
 
             if (_windows.Count > 0)
                 _windows.Last().WindowLevel = UIWindowLevel.Normal;
-            else if (UIApplication.SharedApplication.KeyWindow.WindowLevel == -1)
-                UIApplication.SharedApplication.KeyWindow.WindowLevel = UIWindowLevel.Normal;
+            else {
+                var keyWindow = GetKeyWindow();
+                if (keyWindow?.WindowLevel == -1)
+                    keyWindow.WindowLevel = UIWindowLevel.Normal;
+            }
         }
+    }
+    
+    private static UIWindow? GetKeyWindow()
+    {
+        if (!IsiOS13OrNewer)
+            return UIApplication.SharedApplication.KeyWindow;
+
+        var window = UIApplication.SharedApplication.ConnectedScenes
+            .ToArray()
+            .OfType<UIWindowScene>()
+            .Where(scene => scene.Session.Role == UIWindowSceneSessionRole.Application)
+            .SelectMany(scene => scene.Windows)
+            .FirstOrDefault(window => window.IsKeyWindow);
+
+        return window;
     }
 
     private static void DisposeModelAndChildrenHandlers(VisualElement view)
