@@ -11,15 +11,14 @@ namespace Mopups.Platforms.Windows
     public class PopupPageRenderer : ContentPanel
     {
         private Rect _keyboardBounds;
-        private readonly PopupPageHandler handler;
 
+        public PopupPageHandler Handler;
         internal WinPopup? Container { get; private set; }
 
-        private PopupPage CurrentElement => (PopupPage)handler.VirtualView;
+        private PopupPage CurrentElement => Handler?.VirtualView as PopupPage;
 
-        public PopupPageRenderer(PopupPageHandler handler)
+        public PopupPageRenderer()
         {
-            this.handler = handler;
             this.Loaded += OnLoaded;
             this.Unloaded += OnUnloaded;
         }
@@ -92,7 +91,7 @@ namespace Mopups.Platforms.Windows
         {
             if ((e.OriginalSource as PopupPageRenderer) == this)
             {
-                CurrentElement.SendBackgroundClick();
+                CurrentElement?.SendBackgroundClick();
             }
         }
 
@@ -103,7 +102,7 @@ namespace Mopups.Platforms.Windows
                 var capturedElement = CurrentElement;
 
                 //Window.Current.Bounds replacement
-                var platformWindow = handler.MauiContext.Services.GetService<Microsoft.UI.Xaml.Window>();
+                var platformWindow = Handler.MauiContext.Services.GetService<Microsoft.UI.Xaml.Window>();
                 var windowBound = platformWindow.Bounds;
 
 

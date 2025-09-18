@@ -69,8 +69,12 @@ namespace Mopups.Platforms.iOS
         public override void ViewDidLayoutSubviews()
         {
             base.ViewDidLayoutSubviews();
-            UpdateSize(this);
-            PresentedViewController?.ViewDidLayoutSubviews();
+
+            if (PresentedViewController != null)
+            {
+                UpdateSize(this);
+                PresentedViewController.ViewDidLayoutSubviews();
+            }
 
             void UpdateSize(PopupPageRenderer handler)
             {

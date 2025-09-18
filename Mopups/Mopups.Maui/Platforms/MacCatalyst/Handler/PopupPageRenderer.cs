@@ -69,8 +69,12 @@ namespace Mopups.Platforms.MacCatalyst
         public override void ViewDidLayoutSubviews()
         {
             base.ViewDidLayoutSubviews();
-            UpdateSize(this);
-            PresentedViewController?.ViewDidLayoutSubviews();
+
+            if (PresentedViewController != null)
+            {
+                UpdateSize(this);
+                PresentedViewController.ViewDidLayoutSubviews();
+            }
 
             void UpdateSize(PopupPageRenderer handler)
             {
