@@ -17,7 +17,8 @@ namespace Mopups.Platforms.Windows
 
             base.ConnectHandler(platformView);
 
-            PlatformView.SizeChanged += OnPlatformViewSizeChanged;
+            platformView.SizeChanged += OnPlatformViewSizeChanged;
+            platformView.LayoutUpdated += OnPlatformViewLayoutChanged;
         }
 
         protected override ContentPanel CreatePlatformView()
@@ -27,6 +28,7 @@ namespace Mopups.Platforms.Windows
 
         protected override void DisconnectHandler(ContentPanel platformView)
         {
+            platformView.LayoutUpdated -= OnPlatformViewLayoutChanged;
             platformView.SizeChanged -= OnPlatformViewSizeChanged;
 
             if (platformView is PopupPageRenderer popupPageRenderer)
@@ -38,6 +40,13 @@ namespace Mopups.Platforms.Windows
         private void OnPlatformViewSizeChanged(object sender, Microsoft.UI.Xaml.SizeChangedEventArgs e)
         {
             VirtualView.ComputeDesiredSize(e.NewSize.Width, e.NewSize.Height);
+        }
+
+        private void OnPlatformViewLayoutChanged(object sender, object e)
+        {
+            // for some reason, this extra call to ComputeDesiredSize, which just does a Measure,
+            // is needed to ensure all views are sync'd on size. Solves issue #84.
+            VirtualView.ComputeDesiredSize(this.PlatformView.Width, this.PlatformView.Height);
         }
     }
 }
