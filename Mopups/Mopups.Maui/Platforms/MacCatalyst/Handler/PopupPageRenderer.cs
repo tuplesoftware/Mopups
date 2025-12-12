@@ -70,7 +70,11 @@ namespace Mopups.Platforms.MacCatalyst
         {
             base.ViewDidLayoutSubviews();
 
-            if (PresentedViewController != null)
+            if (PresentedViewController != null
+#if NET_9_0_OR_GREATER
+                && this.Handler.IsConnected()
+#endif
+               )
             {
                 UpdateSize(this);
                 PresentedViewController.ViewDidLayoutSubviews();
