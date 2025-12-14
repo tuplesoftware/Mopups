@@ -1,4 +1,5 @@
-﻿using Mopups.Interfaces;
+﻿using Mopups.Extensions;
+using Mopups.Interfaces;
 using Mopups.Pages;
 using Mopups.Platforms.iOS;
 
@@ -23,7 +24,7 @@ internal class iOSMopups : IPopupPlatform
         if (keyWindow?.WindowLevel == UIWindowLevel.Normal)
             keyWindow.WindowLevel = -1;
 
-        var handler = (page.Handler ??= new PopupPageHandler(page.Parent.Handler.MauiContext)) as PopupPageHandler;
+        var handler = (page.Handler ??= new PopupPageHandler(page.Parent.FindMauiContext())) as PopupPageHandler;
 
         PopupWindow window;
 

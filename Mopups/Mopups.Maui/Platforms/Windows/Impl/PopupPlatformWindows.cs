@@ -1,5 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using Microsoft.Maui.Platform;
+
+using Mopups.Extensions;
 using Mopups.Interfaces;
 using Mopups.Pages;
 using Mopups.Platforms.Windows;
@@ -63,7 +65,7 @@ namespace Mopups.Windows.Implementation
             // Then you can use contructor resolution instead of singletons
             // But I figured we could do that in a later PR and just work on windows here
 
-            var renderer = (PopupPageRenderer)page.ToPlatform(mainPage.Handler.MauiContext);
+            var renderer = (PopupPageRenderer)page.ToPlatform(page.Parent.FindMauiContext());
             renderer.Prepare(popup);
             popup.Child = renderer;
 
