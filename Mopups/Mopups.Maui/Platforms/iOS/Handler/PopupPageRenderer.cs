@@ -53,6 +53,9 @@ namespace Mopups.Platforms.iOS
 
         private void OnTap(UITapGestureRecognizer e)
         {
+            if (e.View.Subviews.Length <= 0)
+                return;
+
             var view = e.View.Subviews.First();
             var location = e.LocationInView(view);
             var subview = view.HitTest(location, null);
