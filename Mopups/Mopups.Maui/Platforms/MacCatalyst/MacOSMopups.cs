@@ -1,6 +1,5 @@
 ﻿using CoreGraphics;
 
-using Microsoft.Maui.Controls.Compatibility.Platform.iOS;
 using Microsoft.Maui.Platform;
 using Mopups.Interfaces;
 using Mopups.Pages;
@@ -24,8 +23,6 @@ internal class MacOSMopups : IPopupPlatform
     {
         var mainPage = Application.Current.MainPage;
         mainPage.AddLogicalChild(page);
-
-        page.DescendantRemoved += HandleChildRemoved;
 
         var keyWindow = GetKeyWindow(UIApplication.SharedApplication);
         if (keyWindow?.WindowLevel == UIWindowLevel.Normal)
@@ -98,8 +95,6 @@ internal class MacOSMopups : IPopupPlatform
 
         await Task.Delay(50);
 
-        page.DescendantRemoved -= HandleChildRemoved;
-
         if (handler != null && viewController != null && !viewController.IsBeingDismissed)
         {
             var window = viewController.View?.Window;
@@ -147,11 +142,4 @@ internal class MacOSMopups : IPopupPlatform
         (view?.Handler?.PlatformView as UIView)?.RemoveFromSuperview();
         (view?.Handler?.PlatformView as UIView)?.Dispose();
     }
-
-    private void HandleChildRemoved(object sender, ElementEventArgs e)
-    {
-        var view = e.Element;
-        DisposeModelAndChildrenHandlers((VisualElement)view);
-    }
-
 }
