@@ -1,4 +1,5 @@
-﻿using Mopups.Interfaces;
+﻿using Mopups.Extensions;
+using Mopups.Interfaces;
 using Mopups.Pages;
 using Mopups.Platforms.iOS;
 
@@ -19,19 +20,17 @@ internal class iOSMopups : IPopupPlatform
         var mainPage = Application.Current.MainPage;
         mainPage.AddLogicalChild(page);
 
-        var keyWindow = GetKeyWindow(UIApplication.SharedApplication);
+        var keyWindow = MopupsHelper.FindKeyWindow();
         if (keyWindow?.WindowLevel == UIWindowLevel.Normal)
             keyWindow.WindowLevel = -1;
 
-        var handler = (page.Handler ??= new PopupPageHandler(page.Parent.Handler.MauiContext)) as PopupPageHandler;
+        var handler = (page.Handler ??= new PopupPageHandler(page.Parent.FindMauiContext())) as PopupPageHandler;
 
         PopupWindow window;
 
         if (IsiOS13OrNewer)
         {
-            var connectedScene = UIApplication.SharedApplication.ConnectedScenes.ToArray()
-                .Where(scene => scene.Session.Role == UIWindowSceneSessionRole.Application)
-                .FirstOrDefault(x => x.ActivationState == UISceneActivationState.ForegroundActive);
+            var connectedScene = MopupsHelper.FindKeyScene();
 
             if (connectedScene != null && connectedScene is UIWindowScene windowScene)
                 window = new PopupWindow(windowScene);
@@ -57,22 +56,6 @@ internal class iOSMopups : IPopupPlatform
 
 
         return window.RootViewController.PresentViewControllerAsync(handler.ViewController, false);
-
-        UIWindow GetKeyWindow(UIApplication application)
-        {
-            if (!IsiOS13OrNewer)
-                return UIApplication.SharedApplication.KeyWindow;
-
-            var window = application
-                .ConnectedScenes
-                .ToArray()
-                .OfType<UIWindowScene>()
-                .Where(scene => scene.Session.Role == UIWindowSceneSessionRole.Application)
-                .SelectMany(scene => scene.Windows)
-                .FirstOrDefault(window => window.IsKeyWindow);
-
-            return window;
-        }
     }
 
     public async Task RemoveAsync(PopupPage page)
@@ -113,8 +96,11 @@ internal class iOSMopups : IPopupPlatform
 
             if (_windows.Count > 0)
                 _windows.Last().WindowLevel = UIWindowLevel.Normal;
-            else if (UIApplication.SharedApplication.KeyWindow.WindowLevel == -1)
-                UIApplication.SharedApplication.KeyWindow.WindowLevel = UIWindowLevel.Normal;
+            else {
+                var keyWindow = MopupsHelper.FindKeyWindow();
+                if (keyWindow?.WindowLevel == -1)
+                    keyWindow.WindowLevel = UIWindowLevel.Normal;
+            }
         }
     }
 

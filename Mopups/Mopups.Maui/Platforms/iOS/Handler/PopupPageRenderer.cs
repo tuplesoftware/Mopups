@@ -53,6 +53,9 @@ namespace Mopups.Platforms.iOS
 
         private void OnTap(UITapGestureRecognizer e)
         {
+            if (e.View.Subviews.Length <= 0)
+                return;
+
             var view = e.View.Subviews.First();
             var location = e.LocationInView(view);
             var subview = view.HitTest(location, null);
@@ -89,20 +92,46 @@ namespace Mopups.Platforms.iOS
 
                 var superviewFrame = handler.Handler.PlatformView.Superview.Frame;
                 var applicationFrame = UIScreen.MainScreen.ApplicationFrame;
+                var keyboardOffset = 0d;
+
+#if NET8_0_OR_GREATER
+                if (handler.KeyboardBounds.Height > 0)
+                {
+                    var keyWindow = MopupsHelper.FindKeyWindow();
+                    var firstResponder = keyWindow?.FindFirstResponder();
+                    
+                    if (firstResponder != null)
+                    {
+                        // getting first responder position on the whole screen
+                        var firstResponderScreenFrame = firstResponder.ConvertRectToView(firstResponder.Bounds, null);
+                        
+                        // proceed if bottom part of the first responder is lower than keyboard
+                        // adding bottom safe area inset because OS returns us shifted up pos of the first responder
+                        if (firstResponderScreenFrame.Bottom + keyWindow.SafeAreaInsets.Bottom > handler.KeyboardBounds.Top)
+                        {
+                            keyboardOffset = firstResponder.Frame.Height;
+                        }
+                    }
+                }
+#else
+                keyboardOffset = handler.KeyboardBounds.Height;
+#endif
 
                 var systemPadding = new Thickness
                 {
                     Left = applicationFrame.Left,
                     Top = applicationFrame.Top,
                     Right = applicationFrame.Right - applicationFrame.Width - applicationFrame.Left,
-                    Bottom = applicationFrame.Bottom - applicationFrame.Height - applicationFrame.Top + handler.KeyboardBounds.Height
+                    Bottom = applicationFrame.Bottom - applicationFrame.Height - applicationFrame.Top
                 };
 
                 if ((handler.Handler.VirtualView.Width != superviewFrame.Width && handler.Handler.VirtualView.Height != superviewFrame.Height)
-                    || currentElement.SystemPadding.Bottom != systemPadding.Bottom)
+                    || currentElement.SystemPadding.Bottom != systemPadding.Bottom
+                    || currentElement.KeyboardOffset != keyboardOffset)
                 {
                     currentElement.BatchBegin();
                     currentElement.SystemPadding = systemPadding;
+                    currentElement.KeyboardOffset = keyboardOffset;
                     currentElement.Layout(new Rect(currentElement.X, currentElement.Y, superviewFrame.Width, superviewFrame.Height));
                     currentElement.BatchCommit();
                 }
@@ -134,7 +163,7 @@ namespace Mopups.Platforms.iOS
 
             _willChangeFrameNotificationObserver = UIKeyboard.Notifications.ObserveWillShow((sender, args) =>
             {
-                KeyboardBounds = args.FrameBegin;
+                KeyboardBounds = args.FrameEnd;
                 ViewDidLayoutSubviews();
             });
 
