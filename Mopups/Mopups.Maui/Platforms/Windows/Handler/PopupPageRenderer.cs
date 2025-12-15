@@ -12,7 +12,7 @@ namespace Mopups.Platforms.Windows
     {
         private Rect _keyboardBounds;
 
-        public PopupPageHandler Handler;
+        internal PopupPageHandler Handler;
         internal WinPopup? Container { get; private set; }
 
         private PopupPage CurrentElement => Handler?.VirtualView as PopupPage;
