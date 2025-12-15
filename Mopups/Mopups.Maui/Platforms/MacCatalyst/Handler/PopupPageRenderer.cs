@@ -71,8 +71,8 @@ namespace Mopups.Platforms.MacCatalyst
             base.ViewDidLayoutSubviews();
 
             if (PresentedViewController != null
-#if NET_9_0_OR_GREATER
-                && this.Handler.IsConnected()
+#if NET9_0_OR_GREATER
+                && Handler.IsConnected()
 #endif
                )
             {
