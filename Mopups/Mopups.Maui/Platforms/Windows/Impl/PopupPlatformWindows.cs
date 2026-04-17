@@ -1,6 +1,5 @@
 ﻿using AsyncAwaitBestPractices;
 using Microsoft.Maui.Platform;
-
 using Mopups.Extensions;
 using Mopups.Interfaces;
 using Mopups.Pages;
